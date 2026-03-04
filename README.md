@@ -1,5 +1,9 @@
 # Z-ARC // The Omega Protocol
 
+## Live Demo
+
+https://sayash54.github.io/HabitOS/
+
 Minimalist **Life-OS** built for discipline-first execution.
 
 Z-ARC is a high-performance personal operating system designed for individuals who value consistency, clarity, and control.
