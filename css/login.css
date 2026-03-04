@@ -1,0 +1,207 @@
+/* ===============================
+   LOGIN SCREEN
+================================ */
+
+.login-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    /* background is handled by #000 body and ambient canvas */
+}
+
+/* ANTI-GRAVITY FLOAT */
+@keyframes bentoFloat {
+    0% {
+        transform: translateY(0px);
+        box-shadow: 0 15px 50px rgba(255, 46, 99, 0.1), inset 0 1px 0 rgba(255, 255, 255, .05);
+    }
+
+    50% {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 60px rgba(255, 46, 99, 0.2), inset 0 1px 0 rgba(255, 255, 255, .1);
+    }
+
+    100% {
+        transform: translateY(0px);
+        box-shadow: 0 15px 50px rgba(255, 46, 99, 0.1), inset 0 1px 0 rgba(255, 255, 255, .05);
+    }
+}
+
+.login-card {
+    width: 90%;
+    max-width: 400px;
+    background: #0c0c0c;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 46, 99, 0.3);
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    position: relative;
+    overflow: hidden;
+
+    animation: bentoFloat 6s ease-in-out infinite;
+
+    opacity: 0;
+    /* GSAP will animate */
+    transform: scale(0.8);
+}
+
+.login-header {
+    text-align: center;
+}
+
+.login-logo {
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FF2E63, #8B0000);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    animation: pulseGlow 3s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    0% {
+        filter: drop-shadow(0 0 10px rgba(255, 46, 99, 0.2));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 25px rgba(255, 46, 99, 0.6));
+    }
+}
+
+.welcome-text {
+    color: #a1a1a1;
+    font-size: 15px;
+}
+
+.login-socials {
+    width: 100%;
+}
+
+.social-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.social-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-4px);
+    border-color: rgba(255, 46, 99, 0.4);
+    box-shadow: 0 10px 20px rgba(255, 46, 99, 0.15);
+}
+
+.social-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.social-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.xp-preview {
+    text-align: right;
+    font-size: 12px;
+    color: #7a7a7a;
+    margin-top: 10px;
+}
+
+.xp-preview .accent {
+    color: #FF2E63;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* PORTAL LOADING (Crimson Pulse) */
+.portal-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    transition: opacity 0.5s ease;
+}
+
+.portal-loading .pulse-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #FF2E63;
+    animation: crimsonPulse 1.5s cubic-bezier(0.2, 0, 0.4, 1) infinite;
+    position: absolute;
+}
+
+.portal-loading .pulse-core {
+    width: 20px;
+    height: 20px;
+    background: #FF2E63;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #FF004D;
+    animation: corePulse 1.5s ease-in-out infinite alternate;
+}
+
+.portal-loading p {
+    color: #FF2E63;
+    letter-spacing: 4px;
+    font-size: 14px;
+    text-transform: uppercase;
+    animation: textPulse 2s ease-in-out infinite alternate;
+    font-weight: 600;
+}
+
+@keyframes crimsonPulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+@keyframes corePulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px #FF004D;
+    }
+
+    100% {
+        transform: scale(1.2);
+        box-shadow: 0 0 30px #FF2E63;
+    }
+}
+
+@keyframes textPulse {
+    0% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
