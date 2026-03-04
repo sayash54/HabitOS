@@ -252,47 +252,74 @@
 
             <!-- WORKOUT SECTION -->
             <section id="nav-workout" class="z-section" style="padding: 24px 16px;">
-                <div class="workout-header"
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <div>
-                        <h2 style="color: var(--text-main); font-size: 24px; margin-bottom: 4px;">Workout Log</h2>
-                        <p style="color: var(--text-soft); font-size: 14px;">Today's routine</p>
+                <!-- Header Removed Per User Request -->
+
+                <!-- The Streak Terminal -->
+                <div class="streak-terminal-bento">
+                    <div class="streak-fire-info">
+                        <i data-lucide="flame" style="color: var(--accent); width: 24px; height: 24px;"></i>
+                        <span style="font-size: 16px; font-weight: 600; color: var(--text-main);">2 weeks streak</span>
                     </div>
-                    <button class="icon-btn bento-hover" id="addExerciseBtn"
-                        style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--accent); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                        <i data-lucide="plus"></i>
+                    <div class="workout-weekly-grid">
+                        <div class="workout-day-circle">
+                            <span class="day-letter">S</span>
+                            <span class="day-number glow-completed">1</span>
+                        </div>
+                        <div class="workout-day-circle">
+                            <span class="day-letter">M</span>
+                            <span class="day-number glow-completed">2</span>
+                        </div>
+                        <div class="workout-day-circle">
+                            <span class="day-letter">T</span>
+                            <span class="day-number glow-completed">3</span>
+                        </div>
+                        <div class="workout-day-circle">
+                            <span class="day-letter">W</span>
+                            <span class="day-number active-today">4</span>
+                        </div>
+                        <div class="workout-day-circle">
+                            <span class="day-letter">T</span>
+                            <span class="day-number">5</span>
+                        </div>
+                        <div class="workout-day-circle">
+                            <span class="day-letter">F</span>
+                            <span class="day-number">6</span>
+                        </div>
+                        <div class="workout-day-circle">
+                            <span class="day-letter">S</span>
+                            <span class="day-number">7</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="protocol-title">Today's Protocol</h3>
+
+                <!-- The Protocol Card -->
+                <div class="protocol-card glass-card">
+                    <div class="target-tags-container">
+                        <span class="workout-tag">CHEST</span>
+                        <span class="workout-tag">SHOULDER</span>
+                        <span class="workout-tag">TRICEPS</span>
+                    </div>
+
+                    <div class="warmup-bar">
+                        <span>Warm-up - 5 min</span>
+                    </div>
+
+                    <ul class="exercise-list-ul">
+                        <li>Wall Pushup</li>
+                        <li>Incline Pushup</li>
+                        <li>Knee Hold Plank</li>
+                        <li>Bench Dips</li>
+                    </ul>
+                </div>
+
+                <!-- Execution Trigger -->
+                <div class="execution-trigger-container">
+                    <button class="start-workout-btn">
+                        <span>START</span>
+                        <i data-lucide="play" style="fill: currentColor; width: 20px; height: 20px;"></i>
                     </button>
-                </div>
-
-                <!-- Daily Summary & Quick Stats -->
-                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-                    <div class="bento-hover"
-                        style="flex: 1; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
-                        <i data-lucide="activity"
-                            style="color: var(--accent); margin-bottom: 4px; width: 16px; height: 16px;"></i>
-                        <div style="font-size: 12px; color: var(--text-soft);">Exercises</div>
-                        <div id="workoutTotalExercises"
-                            style="font-size: 18px; font-weight: 600; color: var(--text-main);">0</div>
-                    </div>
-                    <div class="bento-hover"
-                        style="flex: 1; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
-                        <i data-lucide="weight"
-                            style="color: var(--accent); margin-bottom: 4px; width: 16px; height: 16px;"></i>
-                        <div style="font-size: 12px; color: var(--text-soft);">Volume</div>
-                        <div id="workoutTotalVolume"
-                            style="font-size: 18px; font-weight: 600; color: var(--text-main);">0 kg</div>
-                    </div>
-                </div>
-
-                <div id="workoutList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 80px;">
-                    <!-- Exercises injected dynamically via workout.js -->
-                    <div class="empty-state" id="workoutEmptyState">
-                        <i data-lucide="dumbbell"
-                            style="width: 48px; height: 48px; color: var(--text-dim); margin-bottom: 16px;"></i>
-                        <h3 style="color: var(--text-main); font-size: 16px;">No Exercises Yet</h3>
-                        <p style="color: var(--text-soft); font-size: 14px; margin-top: 8px;">Tap the + icon to add your
-                            first exercise.</p>
-                    </div>
                 </div>
             </section>
 
