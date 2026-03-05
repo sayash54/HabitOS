@@ -4,6 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FF2E63">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Z-ARC: Gamified habit tracking discipline engine">
+    <link rel="manifest" href="manifest.json">
     <title>HabitOS</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/login.css">
@@ -644,12 +649,12 @@
 
                     <div class="form-group">
                         <label for="habitName">Habit Name</label>
-                        <input type="text" id="habitName" placeholder="e.g., Morning Workout" required>
+                        <input type="text" id="habitName" placeholder="e.g., Morning Workout" required maxlength="100">
                     </div>
 
                     <div class="form-group">
                         <label for="habitDesc">Description</label>
-                        <textarea id="habitDesc" placeholder="Why is this habit important?" rows="3"></textarea>
+                        <textarea id="habitDesc" placeholder="Why is this habit important?" rows="3" maxlength="300"></textarea>
                     </div>
 
                     <div class="form-actions">
@@ -677,7 +682,7 @@
 
                     <div class="form-group">
                         <label for="editHabitName">Habit Name</label>
-                        <input type="text" id="editHabitName" placeholder="e.g., Morning Workout" required>
+                        <input type="text" id="editHabitName" placeholder="e.g., Morning Workout" required maxlength="100">
                     </div>
 
                     <div class="form-group">
@@ -726,23 +731,23 @@
                 <form id="addExerciseForm" class="habit-form">
                     <div class="form-group">
                         <label for="exerciseName">Exercise Name</label>
-                        <input type="text" id="exerciseName" placeholder="e.g., Bench Press" required>
+                        <input type="text" id="exerciseName" placeholder="e.g., Bench Press" required maxlength="100">
                     </div>
 
                     <div style="display: flex; gap: 12px;">
                         <div class="form-group" style="flex: 1;">
                             <label for="exerciseSets">Sets</label>
-                            <input type="number" id="exerciseSets" placeholder="3" min="1" required>
+                            <input type="number" id="exerciseSets" placeholder="3" min="1" max="50" required>
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label for="exerciseReps">Target Reps</label>
-                            <input type="number" id="exerciseReps" placeholder="10" min="1" required>
+                            <input type="number" id="exerciseReps" placeholder="10" min="1" max="500" required>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="exerciseWeight">Weight (kg/lbs) <span class="optional">(optional)</span></label>
-                        <input type="number" id="exerciseWeight" placeholder="0" min="0">
+                        <input type="number" id="exerciseWeight" placeholder="0" min="0" max="2000">
                     </div>
 
                     <div class="form-actions">
@@ -776,28 +781,28 @@
 
                     <div class="form-group">
                         <label for="mealName">Food Item</label>
-                        <input type="text" id="mealName" placeholder="e.g., Avocado Toast" required>
+                        <input type="text" id="mealName" placeholder="e.g., Avocado Toast" required maxlength="100">
                     </div>
 
                     <div style="display: flex; gap: 12px;">
                         <div class="form-group" style="flex: 1;">
                             <label for="mealCalories">Calories</label>
-                            <input type="number" id="mealCalories" placeholder="e.g., 350" min="1" required>
+                            <input type="number" id="mealCalories" placeholder="e.g., 350" min="1" max="10000" required>
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 12px;">
                         <div class="form-group" style="flex: 1;">
                             <label for="mealProtein">Protein (g)</label>
-                            <input type="number" id="mealProtein" placeholder="0" min="0">
+                            <input type="number" id="mealProtein" placeholder="0" min="0" max="5000">
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label for="mealCarbs">Carbs (g)</label>
-                            <input type="number" id="mealCarbs" placeholder="0" min="0">
+                            <input type="number" id="mealCarbs" placeholder="0" min="0" max="5000">
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label for="mealFat">Fat (g)</label>
-                            <input type="number" id="mealFat" placeholder="0" min="0">
+                            <input type="number" id="mealFat" placeholder="0" min="0" max="5000">
                         </div>
                     </div>
 

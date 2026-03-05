@@ -1,6 +1,7 @@
 import { AppState, DOM, saveHabits, saveDailyHabits, saveXP, getLocalDateString, generateId } from './main.js';
 import { restoreState, updateProgress } from './stats.js';
 import { updateXPUI } from './ui.js';
+import { escapeHTML, sanitizeInput } from '../utils/storage.js';
 
 /* ===============================
    ICON DETECTION
@@ -92,32 +93,21 @@ export function renderHabits() {
 
     if (activeHabits.length === 0) {
         const emptyState = document.createElement("div");
-        emptyState.className = "empty-state";
-        emptyState.style.gridColumn = "1 / -1";
-        emptyState.style.display = "flex";
-        emptyState.style.flexDirection = "column";
-        emptyState.style.alignItems = "center";
-        emptyState.style.justifyContent = "center";
-        emptyState.style.padding = "40px";
-        emptyState.style.gap = "16px";
-        emptyState.style.textAlign = "center";
-        emptyState.style.background = "var(--card)";
-        emptyState.style.borderRadius = "28px";
-        emptyState.style.border = "1px solid var(--border)";
+        emptyState.className = "habit-empty-state";
 
         emptyState.innerHTML = `
-            <div style="width: 48px; height: 48px; border-radius: 14px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; color: var(--accent);">
+            <div class="habit-empty-state-icon">
                 <i data-lucide="inbox"></i>
             </div>
             <div>
-                <h4 style="font-size: 16px; margin-bottom: 4px; color: var(--text);">No Habits Scheduled</h4>
-                <p style="font-size: 13px; color: var(--text-soft); max-width: 200px; margin: 0 auto;">Build your routine by adding your first habit for the day.</p>
+                <h4>No Habits Scheduled</h4>
+                <p>Build your routine by adding your first habit for the day.</p>
             </div>
-            <div style="display: flex; gap: 12px; margin-top: 8px;">
-                <button class="btn-action" onclick="document.getElementById('addHabitModal').classList.add('active')" style="background: var(--accent); color: #fff; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+            <div class="habit-empty-state-actions">
+                <button class="btn-add" onclick="document.getElementById('addHabitModal').classList.add('active')">
                     <i data-lucide="plus"></i> Add Habit
                 </button>
-                <button class="btn-action" onclick="window.cloneYesterdayHabits()" style="background: transparent; border: 1px solid var(--border); color: var(--text-soft); padding: 10px 16px; border-radius: 12px; font-weight: 600; cursor: pointer;">
+                <button class="btn-clone" onclick="window.cloneYesterdayHabits()">
                     <i data-lucide="copy"></i> Clone
                 </button>
             </div>`;
@@ -147,8 +137,8 @@ export function renderHabits() {
                 <i data-lucide="${icon}"></i>
             </div>
             <div class="task-text">
-                <h4>${habit.name}</h4>
-                ${small ? `<small>${small}</small>` : ""}
+                <h4>${escapeHTML(habit.name)}</h4>
+                ${small ? `<small>${escapeHTML(small)}</small>` : ""}
             </div>
         </div>
             <div class="task-check" style="${isFuture ? 'opacity: 0.3; cursor: not-allowed; background: transparent;' : ''}">
@@ -495,14 +485,27 @@ export function setupAddHabitModal() {
     form.addEventListener("submit", (e) => {
         e.preventDefault();
 
-        const name =
-            document.getElementById("habitName").value;
+        const name = sanitizeInput(
+            document.getElementById("habitName").value, 100);
 
         const time =
             document.getElementById("habitTime").value;
 
-        const desc =
-            document.getElementById("habitDesc").value;
+        const desc = sanitizeInput(
+            document.getElementById("habitDesc").value, 300);
+
+        if (!name) {
+            alert("Please enter a habit name.");
+            return;
+        }
+
+        // Check for duplicate habit names on the same day
+        const existingHabits = AppState.dailyHabits[AppState.selectedDate] || [];
+        if (existingHabits.some(h => h.name.toLowerCase() === name.toLowerCase())) {
+            if (!confirm(`"${name}" already exists for this day. Add it anyway?`)) {
+                return;
+            }
+        }
 
         if (!AppState.dailyHabits[AppState.selectedDate]) {
             AppState.dailyHabits[AppState.selectedDate] = [];
@@ -576,9 +579,14 @@ export function setupEditHabitModal() {
         const habit = AppState.dailyHabits[AppState.selectedDate].find(h => h.id === id);
 
         if (habit) {
-            habit.name = document.getElementById("editHabitName").value;
+            habit.name = sanitizeInput(document.getElementById("editHabitName").value, 100);
             habit.time = document.getElementById("editHabitTime").value;
-            habit.desc = document.getElementById("editHabitDesc").value;
+            habit.desc = sanitizeInput(document.getElementById("editHabitDesc").value, 300);
+
+            if (!habit.name) {
+                alert("Habit name cannot be empty.");
+                return;
+            }
 
             saveDailyHabits();
             renderHabits();

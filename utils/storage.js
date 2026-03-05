@@ -1,13 +1,31 @@
-export function getHabits(){
-    const stored = localStorage.getItem("habits");
-    return JSON.parse(stored) || [
-        { id: 1, name: "Read Book", done: false },
-        { id: 2, name: "Learn Python", done: false },
-        { id: 3, name: "Wake up at 6", done: false },
-        { id: 4, name: "Workout", done: false }
-    ];
+/* ===============================
+   SHARED UTILITIES
+================================ */
+
+/**
+ * Escapes HTML special characters to prevent XSS attacks.
+ * Use this whenever rendering user-supplied data via innerHTML.
+ */
+export function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
-export function saveHabits(data){
-    localStorage.setItem("habits", JSON.stringify(data));
+/**
+ * Validates and clamps a string to a max length.
+ */
+export function sanitizeInput(str, maxLength = 100) {
+    if (typeof str !== 'string') return '';
+    return str.trim().slice(0, maxLength);
+}
+
+/**
+ * Clamps a numeric value between min and max.
+ */
+export function clampNumber(value, min, max) {
+    const num = Number(value);
+    if (isNaN(num)) return min;
+    return Math.max(min, Math.min(max, num));
 }

@@ -1,5 +1,6 @@
-import { AppState, getLocalDateString } from './main.js';
+import { AppState, getLocalDateString, saveNutritionData as saveNutritionDataToCloud } from './main.js';
 import { updateXPUI } from './ui.js';
+import { escapeHTML, sanitizeInput, clampNumber } from '../utils/storage.js';
 
 // Init state if missing
 if (!AppState.nutritionData) {
@@ -58,11 +59,11 @@ function setupEventListeners() {
         e.preventDefault();
 
         const type = document.getElementById('mealType').value;
-        const name = document.getElementById('mealName').value.trim();
-        const calories = parseInt(document.getElementById('mealCalories').value) || 0;
-        const protein = parseInt(document.getElementById('mealProtein').value) || 0;
-        const carbs = parseInt(document.getElementById('mealCarbs').value) || 0;
-        const fat = parseInt(document.getElementById('mealFat').value) || 0;
+        const name = sanitizeInput(document.getElementById('mealName').value, 100);
+        const calories = clampNumber(document.getElementById('mealCalories').value, 1, 10000);
+        const protein = clampNumber(document.getElementById('mealProtein').value, 0, 5000);
+        const carbs = clampNumber(document.getElementById('mealCarbs').value, 0, 5000);
+        const fat = clampNumber(document.getElementById('mealFat').value, 0, 5000);
 
         if (!name || calories <= 0) return;
 
@@ -145,22 +146,15 @@ export function renderNutrition() {
 
             const card = document.createElement('div');
             card.className = 'meal-card bento-hover';
-            card.style.background = 'rgba(255,255,255,0.02)';
-            card.style.border = '1px solid var(--border)';
-            card.style.borderRadius = '16px';
-            card.style.padding = '16px';
-            card.style.display = 'flex';
-            card.style.justifyContent = 'space-between';
-            card.style.alignItems = 'center';
 
             card.innerHTML = `
                 <div style="display: flex; gap: 12px; align-items: center;">
-                    <div style="background: rgba(255,255,255,0.05); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent);">
+                    <div class="meal-card-icon">
                         <i data-lucide="${getIconForMeal(meal.type)}"></i>
                     </div>
                     <div>
-                        <h4 style="color: var(--text-main); font-size: 15px; margin-bottom: 2px;">${meal.name}</h4>
-                        <span style="color: var(--text-soft); font-size: 12px;">${meal.type}</span>
+                        <h4 style="color: var(--text-main); font-size: 15px; margin-bottom: 2px;">${escapeHTML(meal.name)}</h4>
+                        <span style="color: var(--text-soft); font-size: 12px;">${escapeHTML(meal.type)}</span>
                     </div>
                 </div>
                 <div style="text-align: right;">
@@ -222,6 +216,10 @@ function awardNutritionXP(amount) {
 function saveNutritionData() {
     localStorage.setItem("nutritionData", JSON.stringify(AppState.nutritionData));
     localStorage.setItem("waterData", JSON.stringify(AppState.waterData));
+    // Sync to Supabase via centralized sync in main.js
+    if (typeof saveNutritionDataToCloud === 'function') {
+        saveNutritionDataToCloud();
+    }
 }
 
 // Global hooks

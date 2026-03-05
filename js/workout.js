@@ -1,5 +1,6 @@
-import { AppState, getLocalDateString } from './main.js';
+import { AppState, getLocalDateString, saveWorkoutData as saveWorkoutDataToCloud } from './main.js';
 import { updateXPUI } from './ui.js';
+import { escapeHTML, sanitizeInput, clampNumber } from '../utils/storage.js';
 
 // Init state if missing
 if (!AppState.workoutData) {
@@ -40,10 +41,10 @@ function setupEventListeners() {
     addExerciseForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const name = document.getElementById('exerciseName').value.trim();
-        const sets = parseInt(document.getElementById('exerciseSets').value) || 3;
-        const reps = parseInt(document.getElementById('exerciseReps').value) || 10;
-        const weight = parseInt(document.getElementById('exerciseWeight').value) || 0;
+        const name = sanitizeInput(document.getElementById('exerciseName').value, 100);
+        const sets = clampNumber(document.getElementById('exerciseSets').value, 1, 50);
+        const reps = clampNumber(document.getElementById('exerciseReps').value, 1, 500);
+        const weight = clampNumber(document.getElementById('exerciseWeight').value, 0, 2000);
 
         if (!name) return;
 
@@ -94,11 +95,6 @@ export function renderWorkouts() {
         todayWorkouts.forEach(ex => {
             const card = document.createElement('div');
             card.className = 'exercise-card bento-hover';
-            card.style.background = 'rgba(255,255,255,0.02)';
-            card.style.border = '1px solid var(--border)';
-            card.style.borderRadius = '16px';
-            card.style.padding = '16px';
-            card.style.position = 'relative';
 
             // Calculate Volume for this exercise
             const exVolume = ex.completedSets * ex.reps * (ex.weight || 1); // 1 if bodyweight
@@ -118,7 +114,7 @@ export function renderWorkouts() {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                     <div>
                         <h4 style="color: ${titleColor}; font-size: 16px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
-                            ${ex.name} ${statusIcon}
+                            ${escapeHTML(ex.name)} ${statusIcon}
                         </h4>
                         <span style="color: var(--text-soft); font-size: 13px;">${ex.sets} Sets x ${ex.reps} Reps ${ex.weight > 0 ? `| ${ex.weight} kg` : ''}</span>
                     </div>
@@ -193,6 +189,10 @@ function awardWorkoutXP(amount) {
 
 function saveWorkoutData() {
     localStorage.setItem("workoutData", JSON.stringify(AppState.workoutData));
+    // Sync to Supabase via centralized sync in main.js
+    if (typeof saveWorkoutDataToCloud === 'function') {
+        saveWorkoutDataToCloud();
+    }
 }
 
 // Global hook if needed

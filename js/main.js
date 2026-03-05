@@ -73,15 +73,32 @@ function cacheDOM() {
 ================================ */
 
 const syncTimeouts = {};
+const failedSyncs = new Set();
+
+function showSyncError(key) {
+    failedSyncs.add(key);
+    const toast = document.getElementById("successToast");
+    const toastMsg = document.getElementById("toastMsg");
+    if (toast && toastMsg) {
+        toastMsg.textContent = "Cloud sync failed. Changes saved locally.";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 4000);
+    }
+}
+
+function clearSyncError(key) {
+    failedSyncs.delete(key);
+}
 
 function debouncedSync(key, syncFn, delay = 1500) {
     if (syncTimeouts[key]) clearTimeout(syncTimeouts[key]);
     syncTimeouts[key] = setTimeout(async () => {
         try {
             await syncFn();
+            clearSyncError(key);
         } catch (err) {
             console.error(`Background sync failed for ${key}:`, err);
-            // Optionally could trigger a toast or rollback here
+            showSyncError(key);
         }
     }, delay);
 }
@@ -127,6 +144,7 @@ export async function syncDailyDataToSupabase(dateStr) {
         if (error) throw error;
     } catch (e) {
         console.error("Error syncing daily data: ", e);
+        showSyncError('dailyData');
     }
 }
 
@@ -138,6 +156,10 @@ export async function saveStreak() {
 }
 
 export async function saveXP() {
+    // Client-side XP sanity clamping (Fix #5)
+    if (isNaN(AppState.xpData.totalXP)) AppState.xpData.totalXP = 0;
+    AppState.xpData.totalXP = Math.max(0, Math.min(AppState.xpData.totalXP, 500000));
+
     localStorage.setItem("xpData", JSON.stringify(AppState.xpData));
     if (currentUser) {
         debouncedSync('stats', () => syncStatsToSupabase());
@@ -165,6 +187,7 @@ async function syncStatsToSupabase() {
         if (error) throw error;
     } catch (e) {
         console.error("Error syncing stats: ", e);
+        showSyncError('stats');
     }
 }
 
@@ -195,6 +218,11 @@ export async function resetAccountData() {
             currentLevel: 0
         };
 
+        // Clear workout and nutrition data
+        if (AppState.workoutData) AppState.workoutData = {};
+        if (AppState.nutritionData) AppState.nutritionData = {};
+        if (AppState.waterData) AppState.waterData = {};
+
         // Sync fresh profile state to Supabase to overwrite old XP
         await saveXP();
 
@@ -203,6 +231,9 @@ export async function resetAccountData() {
         localStorage.removeItem("dailyHabits");
         localStorage.removeItem("streakData");
         localStorage.removeItem("xpData");
+        localStorage.removeItem("workoutData");
+        localStorage.removeItem("nutritionData");
+        localStorage.removeItem("waterData");
 
         console.log("Data Reset Complete");
 
@@ -404,6 +435,177 @@ export async function fetchCurrentDateData(dateStr) {
 }
 
 /* ===============================
+   WORKOUT & NUTRITION CLOUD SYNC (Fix #3)
+================================ */
+
+export async function saveWorkoutData() {
+    localStorage.setItem("workoutData", JSON.stringify(AppState.workoutData || {}));
+    if (currentUser) {
+        debouncedSync('workout', () => syncWorkoutToSupabase());
+    }
+}
+
+export async function saveNutritionData() {
+    localStorage.setItem("nutritionData", JSON.stringify(AppState.nutritionData || {}));
+    localStorage.setItem("waterData", JSON.stringify(AppState.waterData || {}));
+    if (currentUser) {
+        debouncedSync('nutrition', () => syncNutritionToSupabase());
+    }
+}
+
+async function syncWorkoutToSupabase() {
+    if (!currentUser || !supabase) return;
+    const today = getLocalDateString();
+    const todayWorkouts = (AppState.workoutData || {})[today] || [];
+
+    try {
+        const { error } = await supabase
+            .from('workouts')
+            .upsert({
+                user_id: currentUser.id,
+                date: today,
+                exercises: todayWorkouts
+            }, { onConflict: 'user_id, date' });
+
+        if (error) throw error;
+    } catch (e) {
+        console.error("Error syncing workout data:", e);
+        showSyncError('workout');
+    }
+}
+
+async function syncNutritionToSupabase() {
+    if (!currentUser || !supabase) return;
+    const today = getLocalDateString();
+    const todayMeals = (AppState.nutritionData || {})[today] || [];
+    const todayWater = (AppState.waterData || {})[today] || 0;
+
+    try {
+        const { error } = await supabase
+            .from('nutrition_logs')
+            .upsert({
+                user_id: currentUser.id,
+                date: today,
+                meals: todayMeals,
+                water_glasses: todayWater
+            }, { onConflict: 'user_id, date' });
+
+        if (error) throw error;
+    } catch (e) {
+        console.error("Error syncing nutrition data:", e);
+        showSyncError('nutrition');
+    }
+}
+
+/* ===============================
+   DATA PRUNING (Fix #6)
+================================ */
+
+function pruneLocalStorage() {
+    const today = new Date();
+    const cutoffDate = new Date(today);
+    cutoffDate.setDate(today.getDate() - 30);
+    const cutoffStr = getLocalDateString(cutoffDate);
+
+    // Prune habitState keys older than 30 days
+    let pruned = 0;
+    for (const key of Object.keys(AppState.habitState)) {
+        const dateStr = key.split('_')[0];
+        if (dateStr < cutoffStr) {
+            delete AppState.habitState[key];
+            pruned++;
+        }
+    }
+
+    // Prune dailyHabits older than 30 days (keep in Supabase)
+    for (const dateStr of Object.keys(AppState.dailyHabits)) {
+        if (dateStr < cutoffStr) {
+            delete AppState.dailyHabits[dateStr];
+            pruned++;
+        }
+    }
+
+    // Prune workoutData older than 30 days
+    if (AppState.workoutData) {
+        for (const dateStr of Object.keys(AppState.workoutData)) {
+            if (dateStr < cutoffStr) {
+                delete AppState.workoutData[dateStr];
+                pruned++;
+            }
+        }
+    }
+
+    // Prune nutritionData older than 30 days
+    if (AppState.nutritionData) {
+        for (const dateStr of Object.keys(AppState.nutritionData)) {
+            if (dateStr < cutoffStr) {
+                delete AppState.nutritionData[dateStr];
+                pruned++;
+            }
+        }
+    }
+
+    if (pruned > 0) {
+        console.log(`Pruned ${pruned} old local entries (>30 days)`);
+        localStorage.setItem("habits", JSON.stringify(AppState.habitState));
+        localStorage.setItem("dailyHabits", JSON.stringify(AppState.dailyHabits));
+        if (AppState.workoutData) localStorage.setItem("workoutData", JSON.stringify(AppState.workoutData));
+        if (AppState.nutritionData) localStorage.setItem("nutritionData", JSON.stringify(AppState.nutritionData));
+    }
+}
+
+/* ===============================
+   SYNC RETRY ON RECONNECT (Fix #7)
+================================ */
+
+window.addEventListener('online', () => {
+    if (currentUser && failedSyncs.size > 0) {
+        console.log("Back online. Retrying failed syncs...");
+        const toast = document.getElementById("successToast");
+        const toastMsg = document.getElementById("toastMsg");
+        if (toast && toastMsg) {
+            toastMsg.textContent = "Back online. Syncing...";
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2000);
+        }
+
+        if (failedSyncs.has('habits') || failedSyncs.has('dailyHabits') || failedSyncs.has('dailyData')) {
+            syncDailyDataToSupabase(AppState.selectedDate);
+        }
+        if (failedSyncs.has('stats')) {
+            syncStatsToSupabase();
+        }
+        if (failedSyncs.has('workout')) {
+            syncWorkoutToSupabase();
+        }
+        if (failedSyncs.has('nutrition')) {
+            syncNutritionToSupabase();
+        }
+        failedSyncs.clear();
+    }
+});
+
+// Flush pending debounced syncs before page unload
+window.addEventListener('beforeunload', () => {
+    for (const key of Object.keys(syncTimeouts)) {
+        if (syncTimeouts[key]) {
+            clearTimeout(syncTimeouts[key]);
+        }
+    }
+    // Use sendBeacon for critical data if possible
+    if (currentUser && navigator.sendBeacon) {
+        // Save current state to localStorage as a safety net
+        localStorage.setItem("habits", JSON.stringify(AppState.habitState));
+        localStorage.setItem("dailyHabits", JSON.stringify(AppState.dailyHabits));
+        localStorage.setItem("streakData", JSON.stringify(AppState.streakData));
+        localStorage.setItem("xpData", JSON.stringify(AppState.xpData));
+        if (AppState.workoutData) localStorage.setItem("workoutData", JSON.stringify(AppState.workoutData));
+        if (AppState.nutritionData) localStorage.setItem("nutritionData", JSON.stringify(AppState.nutritionData));
+        if (AppState.waterData) localStorage.setItem("waterData", JSON.stringify(AppState.waterData));
+    }
+});
+
+/* ===============================
    GAMIFICATION MATH ENGINE
 ================================ */
 
@@ -455,6 +657,18 @@ document.addEventListener("DOMContentLoaded", () => {
     setupDeleteHabitModal();
     setupProfile();
     initNotifications();
+
+    // Prune old local data to prevent unbounded growth (Fix #6)
+    pruneLocalStorage();
+
+    // Register service worker for PWA support (Fix #8)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then(() => {
+            console.log("Service Worker registered");
+        }).catch(err => {
+            console.log("Service Worker registration failed:", err);
+        });
+    }
 
     if (supabase) {
         let isInitialLoad = true;
