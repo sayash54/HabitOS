@@ -1,5 +1,6 @@
 import { AppState, getLocalDateString, saveDailyHabits } from './main.js';
 import { renderHabits } from './habits.js';
+import { escapeHTML } from '../utils/storage.js';
 
 /* ===============================
    NOTIFICATION SYSTEM
@@ -191,9 +192,9 @@ export function renderNotificationPanel() {
             const item = document.createElement('div');
             item.className = `notification-item ${notif.read ? '' : 'unread'}`;
             item.innerHTML = `
-                <div class="notif-title">${notif.title}</div>
-                <div class="notif-body">${notif.body}</div>
-                <div class="notif-time">${notif.time}</div>
+                <div class="notif-title">${escapeHTML(notif.title)}</div>
+                <div class="notif-body">${escapeHTML(notif.body)}</div>
+                <div class="notif-time">${escapeHTML(notif.time)}</div>
             `;
             historyContainer.appendChild(item);
         });
@@ -244,7 +245,7 @@ export function renderNotificationPanel() {
             item.innerHTML = `
                 <div class="upcoming-item">
                     <div class="upcoming-info">
-                        <h4 style="text-decoration: ${isCompleted ? 'line-through' : 'none'}; opacity: ${isCompleted ? '0.5' : '1'}">${task.name}</h4>
+                        <h4 style="text-decoration: ${isCompleted ? 'line-through' : 'none'}; opacity: ${isCompleted ? '0.5' : '1'}">${escapeHTML(task.name)}</h4>
                         ${timeHtml}
                     </div>
                     ${actionHtml}

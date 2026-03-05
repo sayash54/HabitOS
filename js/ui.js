@@ -1,5 +1,6 @@
 import { AppState, getLocalDateString, calculateGamification, resetAccountData } from './main.js';
 import { supabase } from './supabase-config.js';
+import { escapeHTML } from '../utils/storage.js';
 
 /* ===============================
    UI LOCAL STATE
@@ -475,7 +476,7 @@ function showDayStats(date) {
                 <i data-lucide="${isDone ? 'check-circle' : 'circle'}"></i>
             </div>
             <div>
-                <h4 style="margin:0; font-size:14px; font-weight:500; text-decoration:${isDone ? 'line-through' : 'none'}; color:${isDone ? 'var(--text-secondary)' : 'var(--text-primary)'}">${h.name}</h4>
+                <h4 style="margin:0; font-size:14px; font-weight:500; text-decoration:${isDone ? 'line-through' : 'none'}; color:${isDone ? 'var(--text-secondary)' : 'var(--text-primary)'}">${escapeHTML(h.name)}</h4>
             </div>
         `;
         list.appendChild(item);
@@ -1049,34 +1050,17 @@ export function openWeeklyReviewModal() {
     // Render bars
     days.forEach((day, index) => {
         const col = document.createElement("div");
-        col.style.display = "flex";
-        col.style.flexDirection = "column";
-        col.style.alignItems = "center";
-        col.style.gap = "8px";
-        col.style.flex = "1";
+        col.className = "weekly-bar-col";
 
         const barWrapper = document.createElement("div");
-        barWrapper.style.width = "100%";
-        barWrapper.style.maxWidth = "24px";
-        barWrapper.style.height = "100px";
-        barWrapper.style.background = "rgba(255,255,255,0.05)";
-        barWrapper.style.borderRadius = "12px";
-        barWrapper.style.position = "relative";
-        barWrapper.style.overflow = "hidden";
+        barWrapper.className = "weekly-bar-wrapper";
 
         const barFill = document.createElement("div");
-        barFill.style.position = "absolute";
-        barFill.style.bottom = "0";
-        barFill.style.left = "0";
-        barFill.style.width = "100%";
-        barFill.style.height = "0%";
-        barFill.style.background = "var(--accent)";
-        barFill.style.borderRadius = "12px";
+        barFill.className = "weekly-bar-fill";
         barFill.style.transition = `height 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.1}s`;
 
         const label = document.createElement("span");
-        label.style.fontSize = "11px";
-        label.style.color = "var(--text-soft)";
+        label.className = "weekly-bar-label";
         label.textContent = day.name;
 
         barWrapper.appendChild(barFill);
@@ -1384,28 +1368,13 @@ function updateMainWeeklyReview() {
     // Render bars
     days.forEach((day, index) => {
         const col = document.createElement("div");
-        col.style.display = "flex";
-        col.style.flexDirection = "column";
-        col.style.alignItems = "center";
-        col.style.gap = "8px";
-        col.style.flex = "1";
+        col.className = "weekly-bar-col";
 
         const barWrapper = document.createElement("div");
-        barWrapper.style.width = "100%";
-        barWrapper.style.maxWidth = "24px";
-        barWrapper.style.height = "100px";
-        barWrapper.style.background = "rgba(255,255,255,0.05)";
-        barWrapper.style.position = "relative";
-        barWrapper.style.overflow = "hidden";
-        barWrapper.classList.add("rounded-bar");
+        barWrapper.className = "weekly-bar-wrapper rounded-bar";
 
         const barFill = document.createElement("div");
-        barFill.style.position = "absolute";
-        barFill.style.bottom = "0";
-        barFill.style.left = "0";
-        barFill.style.width = "100%";
-        barFill.style.height = "0%";
-        barFill.classList.add("rounded-bar");
+        barFill.className = "weekly-bar-fill rounded-bar";
 
         // Highlight today's bar with accent color, others with semi-transparent gray
         if (index === 6) {
@@ -1418,8 +1387,7 @@ function updateMainWeeklyReview() {
         barFill.style.transition = `height 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.1}s`;
 
         const label = document.createElement("span");
-        label.style.fontSize = "11px";
-        label.style.color = "var(--text-soft)";
+        label.className = "weekly-bar-label";
         label.textContent = day.name;
 
         // If today, highlight label also
