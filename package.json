@@ -1,0 +1,27 @@
+{
+  "name": "habitos",
+  "version": "1.0.0",
+  "description": "Minimalist **Life-OS** built for discipline-first execution.",
+  "main": "supabase-config.sample.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sayash54/HabitOS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sayash54/HabitOS/issues"
+  },
+  "homepage": "https://github.com/sayash54/HabitOS#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0"
+  }
+}

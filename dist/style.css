@@ -54,9 +54,6 @@ body {
 
    color: var(--text);
 
-   padding-top: var(--safe-top);
-   padding-bottom: var(--safe-bottom);
-
 }
 
 /* ===============================
@@ -76,57 +73,6 @@ body {
    background: var(--bg);
    overflow-y: auto;
    transition: background 0.3s ease;
-}
-
-
-/* --- MOBILE FIRST (Default styles for Phone) --- */
-.main-container {
-    display: flex;
-    flex-direction: column; /* Mobile par sab ek ke niche ek */
-    padding: 15px;
-}
-
-.bento-grid {
-    display: grid;
-    grid-template-columns: 1fr; /* Single column for mobile */
-    gap: 15px;
-}
-
-/* --- DESKTOP TRANSITION (Badi screen ke liye) --- */
-@media (min-width: 1024px) {
-    .main-container {
-        flex-direction: row; /* Desktop par side-by-side */
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .bento-grid {
-        grid-template-columns: repeat(3, 1fr); /* 3 Columns for Dashboard vibe */
-    }
-    
-    .nav-bar {
-        width: 250px;
-        height: 100vh;
-        position: fixed;
-        left: 0;
-        top: 0;
-        flex-direction: column; /* Side navigation on Desktop */
-    }
-}
-
-/* Stealth Glow Effect on Desktop */
-@media (hover: hover) {
-    .bento-card:hover {
-        border-color: var(--accent);
-        box-shadow: 0 0 15px rgba(255, 46, 99, 0.2);
-        transform: translateY(-5px);
-    }
-}
-
-/* Feedback on Mobile Touch */
-.bento-card:active {
-    transform: scale(0.98);
-    background: #111;
 }
 
 /* ===============================
